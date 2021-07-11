@@ -1,0 +1,85 @@
+import argparse
+from math import ceil, log
+
+parser = argparse.ArgumentParser(description="This program calculate your credit.")
+
+parser.add_argument("-t", "--type", type=str)
+parser.add_argument("-pr", "--principal", type=int)
+parser.add_argument("-pe", "--periods", type=int)
+parser.add_argument("-i", "--interest", type=float)
+parser.add_argument("-pa", "--payment", type=int)
+
+args = parser.parse_args()
+
+params = [args.type, args.principal, args.periods, args.interest, args.payment]
+
+def type_of_calc(params):
+    type = params[0]
+    principal = params[1]
+    periods = params[2]
+    interest = params[3]
+    payment = params[4]
+    if type is None:
+        print('Incorrect parameters')
+        return
+    elif type == 'diff' and payment != None:
+        print('Incorrect parameters')
+        return
+    elif interest is None:
+        print('Incorrect parameters')
+        return
+    elif params.count(None) > 2:
+        print('Incorrect parameters')
+        return
+    if type == 'diff':
+        i = interest / 100 / 12
+        m = 0
+        pays = 0
+        for _ in range(periods):
+            m += 1
+            diff_payment = ceil((principal / periods) + i * (principal - ((principal * (m - 1)) / periods)))
+            print(f'Months {m}: payment is {diff_payment}')
+            pays += diff_payment
+        print()
+        overpay = pays - principal
+        print(f'Overpayment = {overpay}')
+    elif type == 'annuity' and principal is None:
+        i = interest / 100 / 12
+        principal = ceil(payment / ((i * (1 + i) ** periods) / ((1 + i) ** periods - 1)))
+        print(f'Your loan principal = {principal}!')
+        overpay = ceil(principal - payment * periods)
+        print(f'Overpayment = {overpay}')
+    elif type == 'annuity' and payment is None:
+        i = interest / 100 / 12
+        annuit = ceil(principal * ((i * (1 + i) ** periods) / ((1 + i) ** periods - 1)))
+        overpay = ceil(annuit * periods - principal)
+        print(f'Your annuity payment = {annuit}!')
+        print(f'Overpayment = {overpay}')
+    elif type == 'annuity' and periods is None:
+        i = interest / 100 / 12
+        months = ceil(log((payment / (payment - i * principal)), 1 + i))
+        years = months // 12
+        months_print = months % 12
+        if years > 1:
+            if months_print > 1:
+                print(f'It will take {years} years and {months_print} months to repay this loan!')
+            elif months_print == 1:
+                print(f'It will take {years} years and {months_print} month to repay this loan!')
+            else:
+                print(f'It will take {years} years to repay this loan!')
+        elif years == 1:
+            if months_print > 1:
+                print(f'It will take {years} year and {months_print} months to repay this loan!')
+            elif months_print == 1:
+                print(f'It will take {years} year and {months_print} month to repay this loan!')
+            else:
+                print(f'It will take {years} year to repay this loan!')
+        elif years == 0:
+            if months_print > 1:
+                print(f'It will take {months_print} months to repay this loan!')
+            elif months_print == 1:
+                print(f'It will take {months_print} month to repay this loan!')
+        overpay = ceil(payment * months - principal)
+        print(f'Overpayment = {overpay}')
+
+type_of_calc(params)
